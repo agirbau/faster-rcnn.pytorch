@@ -50,7 +50,7 @@ def parse_args():
   parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
   parser.add_argument('--dataset', dest='dataset',
                       help='training dataset',
-                      default='pascal_voc', type=str)
+                      default='coco', type=str)
   parser.add_argument('--cfg', dest='cfg_file',
                       help='optional config file',
                       default='cfgs/vgg16.yml', type=str)
@@ -62,7 +62,7 @@ def parse_args():
                       nargs=argparse.REMAINDER)
   parser.add_argument('--load_dir', dest='load_dir',
                       help='directory to load models',
-                      default="/srv/share/jyang375/models")
+                      default="/home/andreu/Desktop/deep_learning/code/faster-rcnn.pytorch/models")
   parser.add_argument('--image_dir', dest='image_dir',
                       help='directory to load images for demo',
                       default="images")
@@ -83,10 +83,10 @@ def parse_args():
                       default=1, type=int)
   parser.add_argument('--checkepoch', dest='checkepoch',
                       help='checkepoch to load network',
-                      default=1, type=int)
+                      default=10, type=int)
   parser.add_argument('--checkpoint', dest='checkpoint',
                       help='checkpoint to load network',
-                      default=10021, type=int)
+                      default=14657, type=int)
   parser.add_argument('--bs', dest='batch_size',
                       help='batch_size',
                       default=1, type=int)
@@ -145,6 +145,9 @@ if __name__ == '__main__':
   print('Called with args:')
   print(args)
 
+  if args.dataset == 'coco':
+      args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
+
   if args.cfg_file is not None:
     cfg_from_file(args.cfg_file)
   if args.set_cfgs is not None:
@@ -165,7 +168,19 @@ if __name__ == '__main__':
   load_name = os.path.join(input_dir,
     'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
 
-  pascal_classes = np.asarray(['__background__',
+  if args.dataset == 'coco':
+      pascal_classes = np.asarray(['__background__',"person","bicycle","car","motorbike","aeroplane","bus","train","truck","boat",
+                                   "traffic light","fire hydrant","stop sign","parking meter","bench","bird","cat","dog","horse",
+                                   "sheep","cow","elephant","bear","zebra","giraffe","backpack","umbrella","handbag","tie",
+                                   "suitcase","frisbee","skis","snowboard","sports ball","kite","baseball bat",
+                                   "baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass",
+                                   "cup","fork","knife","spoon","bowl","banana","apple","sandwich","orange","broccoli",
+                                   "carrot","hot dog","pizza","donut","cake","chair","sofa","pottedplant","bed",
+                                   "diningtable","toilet","tvmonitor","laptop","mouse","remote","keyboard","cell phone",
+                                   "microwave","oven","toaster","sink",
+                                   "refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"])
+  else:
+    pascal_classes = np.asarray(['__background__',
                        'aeroplane', 'bicycle', 'bird', 'boat',
                        'bottle', 'bus', 'car', 'cat', 'chair',
                        'cow', 'diningtable', 'dog', 'horse',
