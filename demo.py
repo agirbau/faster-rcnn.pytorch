@@ -50,10 +50,10 @@ def parse_args():
   parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
   parser.add_argument('--dataset', dest='dataset',
                       help='training dataset',
-                      default='coco', type=str)
+                      default='pascal_voc', type=str)  # pascal_voc, coco
   parser.add_argument('--cfg', dest='cfg_file',
                       help='optional config file',
-                      default='cfgs/vgg16.yml', type=str)
+                      default='cfgs/res101.yml', type=str)  # vgg16, res101
   parser.add_argument('--net', dest='net',
                       help='vgg16, res50, res101, res152',
                       default='res101', type=str)
@@ -83,10 +83,10 @@ def parse_args():
                       default=1, type=int)
   parser.add_argument('--checkepoch', dest='checkepoch',
                       help='checkepoch to load network',
-                      default=10, type=int)
+                      default=10, type=int)  # 6, 10
   parser.add_argument('--checkpoint', dest='checkpoint',
                       help='checkpoint to load network',
-                      default=14657, type=int)
+                      default=14657, type=int)  # 10021, 14657
   parser.add_argument('--bs', dest='batch_size',
                       help='batch_size',
                       default=1, type=int)
@@ -147,6 +147,7 @@ if __name__ == '__main__':
 
   if args.dataset == 'coco':
       args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]']
+      # args.set_cfgs = ['ANCHOR_SCALES', '[1, 2, 4, 8]', 'ANCHOR_RATIOS', '[0.5,1,2]']
 
   if args.cfg_file is not None:
     cfg_from_file(args.cfg_file)
@@ -256,11 +257,13 @@ if __name__ == '__main__':
     cap = cv2.VideoCapture(webcam_num)
     num_images = 0
   else:
-    imglist = os.listdir(args.image_dir)
+    imglist = sorted(os.listdir(args.image_dir), reverse=True)
     num_images = len(imglist)
 
   print('Loaded Photo: {} images.'.format(num_images))
 
+  idx_to_track = 3  # Tracked player from the 1st frame
+  prev_bboxes = []
 
   while (num_images >= 0):
       total_tic = time.time()
@@ -304,7 +307,7 @@ if __name__ == '__main__':
       rois, cls_prob, bbox_pred, \
       rpn_loss_cls, rpn_loss_box, \
       RCNN_loss_cls, RCNN_loss_bbox, \
-      rois_label = fasterRCNN(im_data, im_info, gt_boxes, num_boxes)
+      rois_label = fasterRCNN(im_data, im_info, gt_boxes, num_boxes, prev_bboxes)
 
       scores = cls_prob.data
       boxes = rois.data[:, :, 1:5]
@@ -334,6 +337,7 @@ if __name__ == '__main__':
 
           pred_boxes = bbox_transform_inv(boxes, box_deltas, 1)
           pred_boxes = clip_boxes(pred_boxes, im_info.data, 1)
+          # pred_boxes = clip_boxes(boxes, im_info.data, 1)
       else:
           # Simply repeat the boxes, once for each class
           pred_boxes = np.tile(boxes, (1, scores.shape[1]))
@@ -357,15 +361,21 @@ if __name__ == '__main__':
               cls_boxes = pred_boxes[inds, :]
             else:
               cls_boxes = pred_boxes[inds][:, j * 4:(j + 1) * 4]
-            
+              # cls_boxes = pred_boxes[inds, :]
+
             cls_dets = torch.cat((cls_boxes, cls_scores.unsqueeze(1)), 1)
             # cls_dets = torch.cat((cls_boxes, cls_scores), 1)
             cls_dets = cls_dets[order]
             # keep = nms(cls_dets, cfg.TEST.NMS, force_cpu=not cfg.USE_GPU_NMS)
             keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
             cls_dets = cls_dets[keep.view(-1).long()]
-            if vis:
-              im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
+            if pascal_classes[j] == 'person':
+                track_cls_dets = cls_dets[idx_to_track].reshape(1, -1).cpu().numpy()
+                if vis:
+                  im2show = vis_detections(im2show, pascal_classes[j], track_cls_dets, 0.5)
+            else:
+                if vis:
+                  im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
 
       misc_toc = time.time()
       nms_time = misc_toc - misc_tic
@@ -379,7 +389,9 @@ if __name__ == '__main__':
           # cv2.imshow('test', im2show)
           # cv2.waitKey(0)
           result_path = os.path.join(args.image_dir, imglist[num_images][:-4] + "_det.jpg")
-          cv2.imwrite(result_path, im2show)
+          # cv2.imwrite(result_path, im2show)
+          cv2.imshow('h', im2show)
+          cv2.waitKey(0)
       else:
           im2showRGB = cv2.cvtColor(im2show, cv2.COLOR_BGR2RGB)
           cv2.imshow("frame", im2showRGB)

@@ -165,10 +165,10 @@ __C.TEST = edict()
 
 # Scale to use during testing (can NOT list multiple scales)
 # The scale is the pixel size of an image's shortest side
-__C.TEST.SCALES = (600,)
+__C.TEST.SCALES = (1080,)
 
 # Max pixel size of the longest side of a scaled input image
-__C.TEST.MAX_SIZE = 1000
+__C.TEST.MAX_SIZE = 1920
 
 # Overlap threshold used for non-maximum suppression (suppress boxes with
 # IoU >= this threshold)
@@ -289,13 +289,17 @@ __C.POOLING_SIZE = 7
 __C.MAX_NUM_GT_BOXES = 20
 
 # Anchor scales for RPN
-__C.ANCHOR_SCALES = [8,16,32]
+# __C.ANCHOR_SCALES = [8,16,32]
+__C.ANCHOR_SCALES = [8,11,14]
+# __C.ANCHOR_SCALES = [5,8,11]
 
 # Anchor ratios for RPN
-__C.ANCHOR_RATIOS = [0.5,1,2]
+# __C.ANCHOR_RATIOS = [0.5,1,2]
+__C.ANCHOR_RATIOS = [1,1.8,2.5]
 
 # Feature stride for RPN
 __C.FEAT_STRIDE = [16, ]
+# __C.FEAT_STRIDE = [10, ]
 
 __C.CUDA = False
 
