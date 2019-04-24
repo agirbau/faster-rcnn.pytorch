@@ -262,7 +262,8 @@ if __name__ == '__main__':
 
   print('Loaded Photo: {} images.'.format(num_images))
 
-  idx_to_track = 3  # Tracked player from the 1st frame
+  idx_to_track = 3  # Initial tracked player from the 1st frame (basket)
+  track_cls_dets = []
   prev_bboxes = []
 
   while (num_images >= 0):
@@ -371,11 +372,14 @@ if __name__ == '__main__':
             cls_dets = cls_dets[keep.view(-1).long()]
             if pascal_classes[j] == 'person':
                 track_cls_dets = cls_dets[idx_to_track].reshape(1, -1).cpu().numpy()
-                if vis:
-                  im2show = vis_detections(im2show, pascal_classes[j], track_cls_dets, 0.5)
-            else:
-                if vis:
-                  im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
+            if vis:
+                im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
+
+      # Andreu
+      prev_bboxes = cls_dets.cpu().numpy()
+      # prev_bboxes = track_cls_dets
+      prev_bboxes[:, 0] = 0.0
+      track_cls_dets = []
 
       misc_toc = time.time()
       nms_time = misc_toc - misc_tic

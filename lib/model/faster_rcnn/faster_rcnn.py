@@ -40,7 +40,7 @@ class _fasterRCNN(nn.Module):
         self.RCNN_roi_pool = ROIPool((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0/16.0)
         self.RCNN_roi_align = ROIAlign((cfg.POOLING_SIZE, cfg.POOLING_SIZE), 1.0/16.0, 0)
 
-    def forward(self, im_data, im_info, gt_boxes, num_boxes, prev_bboxes=None):
+    def forward(self, im_data, im_info, gt_boxes, num_boxes, prev_bboxes=[]):
         batch_size = im_data.size(0)
 
         im_info = im_info.data
@@ -55,7 +55,7 @@ class _fasterRCNN(nn.Module):
         rois, rpn_loss_cls, rpn_loss_bbox = self.RCNN_rpn(base_feat, im_info, gt_boxes, num_boxes)
 
         # Andreu
-        if prev_bboxes:
+        if len(prev_bboxes) > 0:
             # prev_bboxes = [[], [], []]
             # aa = torch.cat((rois, torch.tensor([[[0.0, 0.0, 0.0, 0.0, 0.0]]]).cuda()), dim=1)
             prev_bboxes = torch.tensor([prev_bboxes]).cuda()
