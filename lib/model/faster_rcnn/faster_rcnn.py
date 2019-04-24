@@ -50,8 +50,17 @@ class _fasterRCNN(nn.Module):
         # feed image data to base model to obtain base feature map
         base_feat = self.RCNN_base(im_data)
 
+        # Andreu
+        # import cv2
+        # # aa = torch.mean(base_feat, dim=1).resize(68, 120).cpu().detach().numpy()
+        # aa = torch.max(base_feat, dim=1)[0].resize(68, 120).cpu().detach().numpy()
+        # im = aa/max(aa[0])
+        # im = cv2.resize(im, (0, 0), fx=10, fy=10)
+        # cv2.imshow('h', im)
+        # cv2.waitKey(0)
+        # cv2.destroyWindow('h')
+
         # feed base feature map tp RPN to obtain rois
-        # TODO: here introduce the bbox of the player in t-1 (inside rois)
         rois, rpn_loss_cls, rpn_loss_bbox = self.RCNN_rpn(base_feat, im_info, gt_boxes, num_boxes)
 
         # Andreu
@@ -60,6 +69,7 @@ class _fasterRCNN(nn.Module):
             # aa = torch.cat((rois, torch.tensor([[[0.0, 0.0, 0.0, 0.0, 0.0]]]).cuda()), dim=1)
             prev_bboxes = torch.tensor([prev_bboxes]).cuda()
             rois = torch.cat((rois, prev_bboxes), dim=1)
+            # rois = prev_bboxes
 
         # if it is training phrase, then use ground trubut bboxes for refining
         if self.training:

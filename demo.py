@@ -262,7 +262,7 @@ if __name__ == '__main__':
 
   print('Loaded Photo: {} images.'.format(num_images))
 
-  idx_to_track = 3  # Initial tracked player from the 1st frame (basket)
+  idx_to_track = 1  # Initial tracked player from the 1st frame (basket)
   track_cls_dets = []
   prev_bboxes = []
 
@@ -336,9 +336,9 @@ if __name__ == '__main__':
                                + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS)
                 box_deltas = box_deltas.view(1, -1, 4 * len(pascal_classes))
 
-          pred_boxes = bbox_transform_inv(boxes, box_deltas, 1)
-          pred_boxes = clip_boxes(pred_boxes, im_info.data, 1)
-          # pred_boxes = clip_boxes(boxes, im_info.data, 1)
+          # pred_boxes = bbox_transform_inv(boxes, box_deltas, 1)
+          # pred_boxes = clip_boxes(pred_boxes, im_info.data, 1)
+          pred_boxes = clip_boxes(boxes, im_info.data, 1)
       else:
           # Simply repeat the boxes, once for each class
           pred_boxes = np.tile(boxes, (1, scores.shape[1]))
@@ -353,7 +353,7 @@ if __name__ == '__main__':
       if vis:
           im2show = np.copy(im)
       for j in xrange(1, len(pascal_classes)):
-          inds = torch.nonzero(scores[:,j]>thresh).view(-1)
+          inds = torch.nonzero(scores[:, j] > thresh).view(-1)
           # if there is det
           if inds.numel() > 0:
             cls_scores = scores[:,j][inds]
@@ -361,8 +361,8 @@ if __name__ == '__main__':
             if args.class_agnostic:
               cls_boxes = pred_boxes[inds, :]
             else:
-              cls_boxes = pred_boxes[inds][:, j * 4:(j + 1) * 4]
-              # cls_boxes = pred_boxes[inds, :]
+              # cls_boxes = pred_boxes[inds][:, j * 4:(j + 1) * 4]
+              cls_boxes = pred_boxes[inds, :]
 
             cls_dets = torch.cat((cls_boxes, cls_scores.unsqueeze(1)), 1)
             # cls_dets = torch.cat((cls_boxes, cls_scores), 1)
@@ -376,8 +376,8 @@ if __name__ == '__main__':
                 im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
 
       # Andreu
-      prev_bboxes = cls_dets.cpu().numpy()
-      # prev_bboxes = track_cls_dets
+      prev_bboxes = np.roll(cls_dets.cpu().numpy(), 1)
+      # prev_bboxes = np.roll(track_cls_dets, 1)
       prev_bboxes[:, 0] = 0.0
       track_cls_dets = []
 
@@ -390,12 +390,10 @@ if __name__ == '__main__':
           sys.stdout.flush()
 
       if vis and webcam_num == -1:
-          # cv2.imshow('test', im2show)
-          # cv2.waitKey(0)
+          cv2.imshow('test', im2show)
+          cv2.waitKey(0)
           result_path = os.path.join(args.image_dir, imglist[num_images][:-4] + "_det.jpg")
           # cv2.imwrite(result_path, im2show)
-          cv2.imshow('h', im2show)
-          cv2.waitKey(0)
       else:
           im2showRGB = cv2.cvtColor(im2show, cv2.COLOR_BGR2RGB)
           cv2.imshow("frame", im2showRGB)
