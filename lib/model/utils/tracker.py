@@ -28,7 +28,9 @@ class Tracker:
     def reassign_id(self, id_mat):
         # Reassign the ids of the detections in t [0] to the same as the detections in t-1 [1]
         new_vs_prev_ids_idx = np.where(id_mat == 1)
-        self.bboxes_ids = list(new_vs_prev_ids_idx[1])
+        a = list(new_vs_prev_ids_idx[1])
+        b = [self.bboxes_ids[a[i]] for i in range(len(a))]
+        self.bboxes_ids = b
 
 
 def generate_id_mat_from_score(mat):
