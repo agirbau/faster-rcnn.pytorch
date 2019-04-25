@@ -37,6 +37,8 @@ from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
 import pdb
 
+from model.utils.tracker import Tracker
+
 try:
     xrange          # Python 2
 except NameError:
@@ -262,6 +264,7 @@ if __name__ == '__main__':
 
   print('Loaded Photo: {} images.'.format(num_images))
 
+  tracker = Tracker()
   idx_to_track = 1  # Initial tracked player from the 1st frame (basket)
   track_cls_dets = []
   prev_bboxes = []
@@ -383,8 +386,8 @@ if __name__ == '__main__':
       track_cls_dets = []
 
       bboxes_th = torch.tensor(prev_bboxes[:, 1:])
+      # Compute the iou between detections in time t vs t-1
       if len(prev_bboxes_th) > 0:
-          # TODO: you are here
         overlaps = bbox_overlaps(bboxes_th, prev_bboxes_th)
       prev_bboxes_th = bboxes_th
 
@@ -397,8 +400,8 @@ if __name__ == '__main__':
           sys.stdout.flush()
 
       if vis and webcam_num == -1:
-          cv2.imshow('test', im2show)
-          cv2.waitKey(0)
+          # cv2.imshow('test', im2show)
+          # cv2.waitKey(0)
           result_path = os.path.join(args.image_dir, imglist[num_images][:-4] + "_det.jpg")
           # cv2.imwrite(result_path, im2show)
       else:
