@@ -30,7 +30,7 @@ from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
 from model.rpn.bbox_transform import clip_boxes
 # from model.nms.nms_wrapper import nms
 from model.roi_layers import nms
-from model.rpn.bbox_transform import bbox_transform_inv
+from model.rpn.bbox_transform import bbox_transform_inv, bbox_overlaps
 from model.utils.net_utils import save_net, load_net, vis_detections
 from model.utils.blob import im_list_to_blob
 from model.faster_rcnn.vgg16 import vgg16
@@ -265,6 +265,7 @@ if __name__ == '__main__':
   idx_to_track = 1  # Initial tracked player from the 1st frame (basket)
   track_cls_dets = []
   prev_bboxes = []
+  prev_bboxes_th = []
 
   while (num_images >= 0):
       total_tic = time.time()
@@ -336,9 +337,9 @@ if __name__ == '__main__':
                                + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS)
                 box_deltas = box_deltas.view(1, -1, 4 * len(pascal_classes))
 
-          # pred_boxes = bbox_transform_inv(boxes, box_deltas, 1)
-          # pred_boxes = clip_boxes(pred_boxes, im_info.data, 1)
-          pred_boxes = clip_boxes(boxes, im_info.data, 1)
+          pred_boxes = bbox_transform_inv(boxes, box_deltas, 1)
+          pred_boxes = clip_boxes(pred_boxes, im_info.data, 1)
+          # pred_boxes = clip_boxes(boxes, im_info.data, 1)
       else:
           # Simply repeat the boxes, once for each class
           pred_boxes = np.tile(boxes, (1, scores.shape[1]))
@@ -361,8 +362,8 @@ if __name__ == '__main__':
             if args.class_agnostic:
               cls_boxes = pred_boxes[inds, :]
             else:
-              # cls_boxes = pred_boxes[inds][:, j * 4:(j + 1) * 4]
-              cls_boxes = pred_boxes[inds, :]
+              cls_boxes = pred_boxes[inds][:, j * 4:(j + 1) * 4]
+              # cls_boxes = pred_boxes[inds, :]
 
             cls_dets = torch.cat((cls_boxes, cls_scores.unsqueeze(1)), 1)
             # cls_dets = torch.cat((cls_boxes, cls_scores), 1)
@@ -373,13 +374,19 @@ if __name__ == '__main__':
             if pascal_classes[j] == 'person':
                 track_cls_dets = cls_dets[idx_to_track].reshape(1, -1).cpu().numpy()
             if vis:
-                im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
+                im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.0)
 
       # Andreu
-      prev_bboxes = np.roll(cls_dets.cpu().numpy(), 1)
+      prev_bboxes = np.roll(cls_dets.cpu().numpy(), 1)  # Put the probability to 1st position
       # prev_bboxes = np.roll(track_cls_dets, 1)
       prev_bboxes[:, 0] = 0.0
       track_cls_dets = []
+
+      bboxes_th = torch.tensor(prev_bboxes[:, 1:])
+      if len(prev_bboxes_th) > 0:
+          # TODO: you are here
+        overlaps = bbox_overlaps(bboxes_th, prev_bboxes_th)
+      prev_bboxes_th = bboxes_th
 
       misc_toc = time.time()
       nms_time = misc_toc - misc_tic

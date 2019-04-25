@@ -68,8 +68,8 @@ class _fasterRCNN(nn.Module):
             # prev_bboxes = [[], [], []]
             # aa = torch.cat((rois, torch.tensor([[[0.0, 0.0, 0.0, 0.0, 0.0]]]).cuda()), dim=1)
             prev_bboxes = torch.tensor([prev_bboxes]).cuda()
-            rois = torch.cat((rois, prev_bboxes), dim=1)
-            # rois = prev_bboxes
+            # rois = torch.cat((rois, prev_bboxes), dim=1)
+            rois = prev_bboxes
 
         # if it is training phrase, then use ground trubut bboxes for refining
         if self.training:
