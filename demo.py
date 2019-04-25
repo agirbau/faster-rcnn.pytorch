@@ -37,7 +37,7 @@ from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
 import pdb
 
-from model.utils.tracker import Tracker
+from model.utils.tracker import Tracker, ColorGenerator, generate_id_mat_from_score
 
 try:
     xrange          # Python 2
@@ -265,6 +265,7 @@ if __name__ == '__main__':
   print('Loaded Photo: {} images.'.format(num_images))
 
   tracker = Tracker()
+  color_generator = ColorGenerator()
   idx_to_track = 1  # Initial tracked player from the 1st frame (basket)
   track_cls_dets = []
   prev_bboxes = []
@@ -383,12 +384,28 @@ if __name__ == '__main__':
       prev_bboxes = np.roll(cls_dets.cpu().numpy(), 1)  # Put the probability to 1st position
       # prev_bboxes = np.roll(track_cls_dets, 1)
       prev_bboxes[:, 0] = 0.0
-      track_cls_dets = []
 
       bboxes_th = torch.tensor(prev_bboxes[:, 1:])
       # Compute the iou between detections in time t vs t-1
       if len(prev_bboxes_th) > 0:
-        overlaps = bbox_overlaps(bboxes_th, prev_bboxes_th)
+        overlaps_th = bbox_overlaps(bboxes_th, prev_bboxes_th)
+        overlaps = overlaps_th.numpy()
+        overlaps_bin = generate_id_mat_from_score(overlaps)
+        tracker.reassign_id(overlaps_bin)
+        bboxes = bboxes_th.numpy()
+      else:
+          bboxes = prev_bboxes[:, 1:]
+          tracker.init_bboxes_ids(bboxes)
+
+      im_2 = np.copy(im)
+      for i, bbox in enumerate(bboxes):
+          bbox = tuple(int(n) for n in bbox)
+          c = tuple(color_generator.colors[tracker.bboxes_ids[i]].tolist())
+          cv2.rectangle(im_2, bbox[0:2], bbox[2:4], c, 2)
+
+      cv2.imshow('h', im_2)
+      cv2.waitKey(0)
+
       prev_bboxes_th = bboxes_th
 
       misc_toc = time.time()

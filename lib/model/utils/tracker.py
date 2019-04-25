@@ -1,6 +1,17 @@
 import numpy as np
 import torch
 from model.rpn.bbox_transform import  bbox_overlaps
+np.random.seed(123)
+
+
+class ColorGenerator:
+    def __init__(self):
+        self.colors = None
+        self.generate_colors()
+
+    def generate_colors(self):
+        colors = np.mgrid[0:255:50, 0:255:50, 0:255:50].reshape(3, -1).T
+        self.colors = np.random.permutation(colors)
 
 
 class Tracker:
@@ -14,8 +25,13 @@ class Tracker:
             self.bboxes.append(bbox)
             self.bboxes_ids.append(idx)
 
+    def reassign_id(self, id_mat):
+        # Reassign the ids of the detections in t [0] to the same as the detections in t-1 [1]
+        new_vs_prev_ids_idx = np.where(id_mat == 1)
+        self.bboxes_ids = list(new_vs_prev_ids_idx[1])
 
-def matrix_binarize_to_max(mat):
+
+def generate_id_mat_from_score(mat):
     mat_bin_rows = np.zeros_like(mat)
     mat_bin_cols = np.zeros_like(mat)
     mat_bin = np.zeros_like(mat)
@@ -68,6 +84,28 @@ if __name__ == "__main__":
     overlaps_th = bbox_overlaps(bboxes_th, prev_bboxes_th)
 
     overlaps = overlaps_th.numpy()
-    overlaps_bin = matrix_binarize_to_max(overlaps)
-
+    overlaps_bin = generate_id_mat_from_score(overlaps)
     print(overlaps_bin)
+
+    tracker.reassign_id(overlaps_bin)
+
+    color_generator = ColorGenerator()
+    im = np.zeros((1080, 1920, 3), dtype=np.uint8)
+
+    import cv2
+
+    for i, prev_bbox in enumerate(prev_bboxes):
+        prev_bbox = tuple(int(n) for n in prev_bbox)
+        c = tuple(color_generator.colors[i].tolist())
+        cv2.rectangle(im, prev_bbox[0:2], prev_bbox[2:4], c, 5, lineType=4)
+        # cv2.putText(im, '%s: %.3f' % (class_name, score), (bbox[0], bbox[1] + 15), cv2.FONT_HERSHEY_PLAIN,
+        #             1.0, (0, 0, 255), thickness=1)
+
+    for i, bbox in enumerate(bboxes):
+        bbox = tuple(int(n) for n in bbox)
+        c = tuple(color_generator.colors[tracker.bboxes_ids[i]].tolist())
+        cv2.rectangle(im, bbox[0:2], bbox[2:4], c, 1, lineType=4)
+
+    cv2.imshow('h', im)
+    cv2.waitKey(0)
+    cv2.destroyWindow('h')
