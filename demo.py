@@ -1,3 +1,10 @@
+# TODO: 1. Associar bbox amb prior
+# TODO: 2. Detectar bbox respecte priors i respecte anchors. Fer NMS de deteccions de priors vs anchors.
+# TODO: 3. Assignar ID a cada bbox nova (que no vingui de les priors).
+# TODO: 4. Entrenar una xarxa siamesa per reidentificació
+# TODO: 5. Guardar embeddings de les deteccions per cada frame. Els farem servir per pèrdues d'objecte.
+# TODO: 6. Comparar embeddings de deteccions noves (no assignades per anar més ràpid) amb deteccions que venien de t-1
+# TODO: no detectades mitjançant les priors, per veure si hem de reprendre un track que s'ha perdut.
 # --------------------------------------------------------
 # Tensorflow Faster R-CNN
 # Licensed under The MIT License [see LICENSE for details]
