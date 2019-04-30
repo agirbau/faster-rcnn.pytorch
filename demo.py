@@ -59,7 +59,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
     parser.add_argument('--dataset', dest='dataset',
                         help='training dataset',
-                        default='pascal_voc', type=str)  # pascal_voc, coco
+                        default='coco', type=str)  # pascal_voc, coco
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file',
                         default='cfgs/res101.yml', type=str)  # vgg16, res101
