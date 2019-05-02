@@ -362,6 +362,9 @@ if __name__ == '__main__':
         det_toc = time.time()
         detect_time = det_toc - det_tic
         misc_tic = time.time()
+
+        all_bboxes = torch.Tensor([]).cuda()
+
         if vis:
             im2show = np.copy(im)
         for j in xrange(1, len(pascal_classes)):
@@ -382,13 +385,14 @@ if __name__ == '__main__':
                 # keep = nms(cls_dets, cfg.TEST.NMS, force_cpu=not cfg.USE_GPU_NMS)
                 keep = nms(cls_boxes[order, :], cls_scores[order], cfg.TEST.NMS)
                 cls_dets = cls_dets[keep.view(-1).long()]
+                all_bboxes = torch.cat((all_bboxes, cls_dets), 0)
                 if pascal_classes[j] == 'person':
                     track_cls_dets = cls_dets[idx_to_track].reshape(1, -1).cpu().numpy()
                 if vis:
                     im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.0)
 
         # Andreu
-        prev_bboxes = np.roll(cls_dets.cpu().numpy(), 1)  # Put the probability to 1st position
+        prev_bboxes = np.roll(all_bboxes.cpu().numpy(), 1)  # Put the probability to 1st position
         # prev_bboxes = np.roll(track_cls_dets, 1)
         prev_bboxes[:, 0] = 0.0
 
