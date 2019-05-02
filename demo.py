@@ -44,7 +44,7 @@ from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
 import pdb
 
-from model.utils.tracker import Tracker, ColorGenerator, generate_id_mat_from_score
+from model.utils.tracker import Tracker, ColorGenerator, generate_id_mat_from_score, reorder_pred_boxes
 
 try:
     xrange          # Python 2
@@ -74,7 +74,7 @@ def parse_args():
                         default="/home/andreu/Desktop/deep_learning/code/faster-rcnn.pytorch/models")
     parser.add_argument('--image_dir', dest='image_dir',
                         help='directory to load images for demo',
-                        default="images")
+                        default="images/basket_china")
     parser.add_argument('--cuda', dest='cuda',
                         help='whether use CUDA',
                         action='store_true')
@@ -399,10 +399,16 @@ if __name__ == '__main__':
         bboxes_th = torch.tensor(prev_bboxes[:, 1:])
         # Compute the iou between detections in time t vs t-1
         if len(prev_bboxes_th) > 0:
-            overlaps_th = bbox_overlaps(bboxes_th, prev_bboxes_th)
+            # pred_boxes = prev_boxes + deltas
+            pred_boxes, num_pred_boxes = reorder_pred_boxes(pred_boxes)
+            overlaps_th = bbox_overlaps(bboxes_th, pred_boxes.cpu())
+            # Works with iou vs boxes in t-1
+            # overlaps_th = bbox_overlaps(bboxes_th, prev_bboxes_th)
             overlaps = overlaps_th.numpy()
             overlaps_bin = generate_id_mat_from_score(overlaps)
-            tracker.reassign_id(overlaps_bin)
+            # To match bbox in t-1 with predictions in t
+            overlaps_bin = np.where(overlaps_bin == 1.0, 1, 0)
+            tracker.reassign_id(overlaps_bin, num_classes=len(pascal_classes))
             bboxes = bboxes_th.numpy()
         else:
             bboxes = prev_bboxes[:, 1:]
@@ -416,7 +422,7 @@ if __name__ == '__main__':
             pos1 = int(bbox[0])
             pos2 = int(bbox[1]) + 15
             cv2.putText(im_2, str(tracker.bboxes_ids[i]), (pos1, pos2),
-                        cv2.FONT_HERSHEY_PLAIN, fontScale=2.0, color=(0, 0, 255), thickness=3)
+                        cv2.FONT_HERSHEY_PLAIN, fontScale=1, color=(0, 0, 255), thickness=1.25)
 
         cv2.imshow('h', im_2)
         cv2.waitKey(0)
