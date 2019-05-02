@@ -409,6 +409,10 @@ if __name__ == '__main__':
             bbox = tuple(int(n) for n in bbox)
             c = tuple(color_generator.colors[tracker.bboxes_ids[i]].tolist())
             cv2.rectangle(im_2, bbox[0:2], bbox[2:4], c, 2)
+            pos1 = int(bbox[0])
+            pos2 = int(bbox[1]) + 15
+            cv2.putText(im_2, str(tracker.bboxes_ids[i]), (pos1, pos2),
+                        cv2.FONT_HERSHEY_PLAIN, fontScale=2.0, color=(0, 0, 255), thickness=3)
 
         cv2.imshow('h', im_2)
         cv2.waitKey(0)
