@@ -1,4 +1,5 @@
-# TODO: 1. Associar bbox amb prior
+# TODO: 1. Associar bbox amb prior (DONE)
+# TODO: 1.5. Entrenar xarxa per player detection
 # TODO: 2. Detectar bbox respecte priors i respecte anchors. Fer NMS de deteccions de priors vs anchors.
 # TODO: 3. Assignar ID a cada bbox nova (que no vingui de les priors).
 # TODO: 4. Entrenar una xarxa siamesa per reidentificació
@@ -59,7 +60,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
     parser.add_argument('--dataset', dest='dataset',
                         help='training dataset',
-                        default='pascal_voc', type=str)  # pascal_voc, coco
+                        default='coco', type=str)  # pascal_voc, coco
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file',
                         default='cfgs/res101.yml', type=str)  # vgg16, res101
@@ -422,7 +423,7 @@ if __name__ == '__main__':
             pos1 = int(bbox[0])
             pos2 = int(bbox[1]) + 15
             cv2.putText(im_2, str(tracker.bboxes_ids[i]), (pos1, pos2),
-                        cv2.FONT_HERSHEY_PLAIN, fontScale=1, color=(0, 0, 255), thickness=1.25)
+                        cv2.FONT_HERSHEY_PLAIN, fontScale=1, color=(0, 0, 255), thickness=2)
 
         cv2.imshow('h', im_2)
         cv2.waitKey(0)
