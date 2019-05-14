@@ -20,10 +20,10 @@ import uuid
 import scipy.io as sio
 import xml.etree.ElementTree as ET
 import pickle
-from .imdb import imdb
-from .imdb import ROOT_DIR
-from . import ds_utils
-from .voc_eval import voc_eval
+from datasets.imdb import imdb
+from datasets.imdb import ROOT_DIR
+from datasets import ds_utils
+from datasets.voc_eval import voc_eval
 
 # TODO: make fast_rcnn irrelevant
 # >>>> obsolete, because it depends on sth outside of this project

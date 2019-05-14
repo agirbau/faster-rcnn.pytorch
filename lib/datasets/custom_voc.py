@@ -17,10 +17,10 @@ import uuid
 import scipy.io as sio
 import xml.etree.ElementTree as ET
 import pickle
-from .imdb import imdb
-from .imdb import ROOT_DIR
-from . import ds_utils
-from .voc_eval import voc_eval
+from datasets.imdb import imdb
+from datasets.imdb import ROOT_DIR
+from datasets import ds_utils
+from datasets.voc_eval import voc_eval
 
 # TODO: make fast_rcnn irrelevant
 # >>>> obsolete, because it depends on sth outside of this project
@@ -35,13 +35,13 @@ except NameError:
 
 
 class custom_voc(imdb):
-    def __init__(self, image_set, year, devkit_path=None):
-        imdb.__init__(self, 'voc_' + year + '_' + image_set)
-        self._year = year
+    def __init__(self, dataset_name, image_set, devkit_path=None):
+        imdb.__init__(self, dataset_name)
+
         self._image_set = image_set
         self._devkit_path = self._get_default_path() if devkit_path is None \
             else devkit_path
-        self._data_path = os.path.join(self._devkit_path, 'VOC' + self._year)
+        self._data_path = os.path.join(self._devkit_path, dataset_name)
         self._classes = ('__background__',  # always index 0
                          'ball', 'player', 'referee')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
@@ -61,8 +61,6 @@ class custom_voc(imdb):
                        'rpn_file': None,
                        'min_size': 2}
 
-        assert os.path.exists(self._devkit_path), \
-            'VOCdevkit path does not exist: {}'.format(self._devkit_path)
         assert os.path.exists(self._data_path), \
             'Path does not exist: {}'.format(self._data_path)
 
@@ -106,7 +104,7 @@ class custom_voc(imdb):
         """
         Return the default path where PASCAL VOC is expected to be installed.
         """
-        return os.path.join(cfg.DATA_DIR, 'VOCdevkit' + self._year)
+        return os.path.join(cfg.DATA_DIR, 'atv')
 
     def gt_roidb(self):
         """
@@ -224,10 +222,15 @@ class custom_voc(imdb):
         for ix, obj in enumerate(objs):
             bbox = obj.find('bndbox')
             # Make pixel indexes 0-based
-            x1 = float(bbox.find('xmin').text) - 1
-            y1 = float(bbox.find('ymin').text) - 1
-            x2 = float(bbox.find('xmax').text) - 1
-            y2 = float(bbox.find('ymax').text) - 1
+            xleft = float(bbox.find('xleft').text)
+            ytop = float(bbox.find('ytop').text)
+            width = float(bbox.find('width').text)
+            height = float(bbox.find('height').text)
+
+            x1 = xleft - 1
+            y1 = ytop - 1
+            x2 = (xleft + width) - 1
+            y2 = (ytop + height) - 1
 
             diffc = obj.find('difficult')
             difficult = 0 if diffc == None else int(diffc.text)
@@ -362,7 +365,8 @@ class custom_voc(imdb):
 
 
 if __name__ == '__main__':
-    d = pascal_voc('trainval', '2007')
+    # d = custom_voc('basketball', 'train')
+    d = custom_voc('football_subset', 'train')
     res = d.roidb
     from IPython import embed;
 
