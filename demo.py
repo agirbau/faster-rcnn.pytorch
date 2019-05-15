@@ -34,7 +34,8 @@ import torchvision.datasets as dset
 from scipy.misc import imread
 from roi_data_layer.roidb import combined_roidb
 from roi_data_layer.roibatchLoader import roibatchLoader
-from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
+# from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
+from experiments.scripts.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
 from model.rpn.bbox_transform import clip_boxes
 # from model.nms.nms_wrapper import nms
 from model.roi_layers import nms

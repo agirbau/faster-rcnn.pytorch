@@ -24,7 +24,8 @@ from datasets.voc_eval import voc_eval
 
 # TODO: make fast_rcnn irrelevant
 # >>>> obsolete, because it depends on sth outside of this project
-from model.utils.config import cfg
+# from model.utils.config import cfg
+from experiments.scripts.config import cfg
 
 try:
     xrange          # Python 2
@@ -119,7 +120,7 @@ class custom_voc(imdb):
             print('{} gt roidb loaded from {}'.format(self.name, cache_file))
             return roidb
 
-        gt_roidb = [self._load_pascal_annotation(index)
+        gt_roidb = [self._load_atv_annotation(index)
                     for index in self.image_index]
         with open(cache_file, 'wb') as fid:
             pickle.dump(gt_roidb, fid, pickle.HIGHEST_PROTOCOL)
@@ -193,7 +194,7 @@ class custom_voc(imdb):
 
         return self.create_roidb_from_box_list(box_list, gt_roidb)
 
-    def _load_pascal_annotation(self, index):
+    def _load_atv_annotation(self, index):
         """
         Load image and bounding boxes info from XML file in the PASCAL VOC
         format.

@@ -28,9 +28,10 @@ for year in ['2007', '2012']:
     __sets[name] = (lambda split=split, year=year: pascal_voc(split, year))
 
 # Andreu
-for sport in ['basketball', 'football_subset']:
+for sport in ['basketball', 'football_subset', 'football_test']:
     for split in ['train']:
-        __sets[name] = (lambda name=sport, split=split: custom_voc(name, split))
+        name = sport
+        __sets[name] = (lambda sp=sport, split=split: custom_voc(sp, split))
 
 # Set up coco_2014_<split>
 for year in ['2014']:

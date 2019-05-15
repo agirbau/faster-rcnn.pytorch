@@ -6,7 +6,8 @@ from torch.autograd import Variable
 import torchvision.models as models
 from torch.autograd import Variable
 import numpy as np
-from model.utils.config import cfg
+# from model.utils.config import cfg
+from experiments.scripts.config import cfg
 from model.rpn.rpn import _RPN
 
 from model.roi_layers import ROIAlign, ROIPool

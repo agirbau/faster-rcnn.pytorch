@@ -26,7 +26,8 @@ from torch.utils.data.sampler import Sampler
 
 from roi_data_layer.roidb import combined_roidb
 from roi_data_layer.roibatchLoader import roibatchLoader
-from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
+# from model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
+from experiments.scripts.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
 from model.utils.net_utils import weights_normal_init, save_net, load_net, \
       adjust_learning_rate, save_checkpoint, clip_gradient
 
@@ -174,9 +175,9 @@ if __name__ == '__main__':
       args.imdb_name = "vg_150-50-50_minitrain"
       args.imdbval_name = "vg_150-50-50_minival"
       args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '50']
-  elif args.dataset == "cst_basketball":
-      args.imdb_name = "voc_2007_trainval"
-      args.imdbval_name = "voc_2007_test"
+  elif args.dataset == "cst":
+      args.imdb_name = "basketball"
+      args.imdbval_name = "basketball"
       args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '40']
 
   args.cfg_file = "cfgs/{}_ls.yml".format(args.net) if args.large_scale else "cfgs/{}.yml".format(args.net)
@@ -196,7 +197,6 @@ if __name__ == '__main__':
 
   # train set
   # -- Note: Use validation set and disable the flipped to enable faster loading.
-  cfg.TRAIN.USE_FLIPPED = True
   cfg.USE_GPU_NMS = args.cuda
   imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
   train_size = len(roidb)
