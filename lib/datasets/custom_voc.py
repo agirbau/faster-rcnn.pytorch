@@ -22,6 +22,8 @@ from datasets.imdb import ROOT_DIR
 from datasets import ds_utils
 from datasets.voc_eval import voc_eval
 
+from time import time
+
 # TODO: make fast_rcnn irrelevant
 # >>>> obsolete, because it depends on sth outside of this project
 # from model.utils.config import cfg
@@ -201,6 +203,10 @@ class custom_voc(imdb):
         """
         filename = os.path.join(self._data_path, 'Annotations', index + '.xml')
         tree = ET.parse(filename)
+        img_data = tree.find('size')
+        img_w = float(img_data.find('width').text)
+        img_h = float(img_data.find('height').text)
+        img_d = float(img_data.find('depth').text)
         objs = tree.findall('object')
         # if not self.config['use_diff']:
         #     # Exclude the samples labeled as difficult
@@ -228,10 +234,16 @@ class custom_voc(imdb):
             width = float(bbox.find('width').text)
             height = float(bbox.find('height').text)
 
-            x1 = xleft - 1
-            y1 = ytop - 1
-            x2 = (xleft + width) - 1
-            y2 = (ytop + height) - 1
+            x1 = max(xleft - 1, 0)
+            y1 = max(ytop - 1, 0)
+            x2 = min(x1 + width, img_w - 1)
+            y2 = min(y1 + height, img_h - 1)
+
+            if x2 >= img_w or y2 >= img_h:
+                print(filename + 'x1: ' + str(x1) + ' x2: ' + str(x2) + ' y1: ' + str(y1) + ' y2: ' + str(y2))
+
+            # if x1 >= x2 or y1 >= y2:
+            #     print(filename + ' x1: ' + str(x1) + ' x2: ' + str(x2) + ' y1: ' + str(y1) + ' y2: ' + str(y2))
 
             diffc = obj.find('difficult')
             difficult = 0 if diffc == None else int(diffc.text)

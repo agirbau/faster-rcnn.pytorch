@@ -46,11 +46,11 @@ __C.TRAIN.TRUNCATED = False
 __C.TRAIN.BIAS_DECAY = False
 
 # Whether to add ground truth boxes to the pool when sampling regions
-__C.TRAIN.USE_GT = False
+__C.TRAIN.USE_GT = True
 
 # Whether to use aspect-ratio grouping of training images, introduced merely for saving
 # GPU memory
-__C.TRAIN.ASPECT_GROUPING = False
+__C.TRAIN.ASPECT_GROUPING = True
 
 # The number of snapshots kept, older ones are deleted to save space
 __C.TRAIN.SNAPSHOT_KEPT = 3
@@ -60,10 +60,10 @@ __C.TRAIN.SUMMARY_INTERVAL = 180
 
 # Scale to use during training (can list multiple scales)
 # The scale is the pixel size of an image's shortest side
-__C.TRAIN.SCALES = (600,)
+__C.TRAIN.SCALES = (272, 544)
 
 # Max pixel size of the longest side of a scaled input image
-__C.TRAIN.MAX_SIZE = 1000
+__C.TRAIN.MAX_SIZE = 960
 
 # Trim size for input images to create minibatch
 __C.TRAIN.TRIM_HEIGHT = 600
@@ -73,7 +73,8 @@ __C.TRAIN.TRIM_WIDTH = 600
 __C.TRAIN.IMS_PER_BATCH = 1
 
 # Minibatch size (number of regions of interest [ROIs])
-__C.TRAIN.BATCH_SIZE = 128
+# __C.TRAIN.BATCH_SIZE = 128
+__C.TRAIN.BATCH_SIZE = 256
 
 # Fraction of minibatch that is labeled foreground (i.e. class > 0)
 __C.TRAIN.FG_FRACTION = 0.25
@@ -87,7 +88,7 @@ __C.TRAIN.BG_THRESH_HI = 0.5
 __C.TRAIN.BG_THRESH_LO = 0.1
 
 # Use horizontally-flipped images during training?
-__C.TRAIN.USE_FLIPPED = True
+__C.TRAIN.USE_FLIPPED = False
 
 # Train bounding-box regressors
 __C.TRAIN.BBOX_REG = True
@@ -97,7 +98,7 @@ __C.TRAIN.BBOX_REG = True
 __C.TRAIN.BBOX_THRESH = 0.5
 
 # Iterations between snapshots
-__C.TRAIN.SNAPSHOT_ITERS = 5000
+__C.TRAIN.SNAPSHOT_ITERS = 500
 
 # solver.prototxt specifies the snapshot path prefix, this adds an optional
 # infix to yield the path: <prefix>[_<infix>]_iters_XYZ.caffemodel
@@ -215,7 +216,7 @@ __C.RESNET = edict()
 # if true, the region will be resized to a square of 2xPOOLING_SIZE,
 # then 2x2 max-pooling is applied; otherwise the region will be directly
 # resized to a square of POOLING_SIZE
-__C.RESNET.MAX_POOL = False
+__C.RESNET.MAX_POOL = True
 
 # Number of fixed blocks during training, by default the first of all 4 blocks is fixed
 # Range: 0 (none) to 3 (all)
@@ -301,7 +302,7 @@ __C.ANCHOR_RATIOS = [1,1.8,2.5]
 __C.FEAT_STRIDE = [16, ]
 # __C.FEAT_STRIDE = [10, ]
 
-__C.CUDA = False
+__C.CUDA = True
 
 __C.CROP_RESIZE_WITH_MAX_POOL = True
 

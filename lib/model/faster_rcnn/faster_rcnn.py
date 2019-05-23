@@ -53,9 +53,9 @@ class _fasterRCNN(nn.Module):
 
         # Andreu
         # import cv2
-        # # aa = torch.mean(base_feat, dim=1).resize(68, 120).cpu().detach().numpy()
-        # aa = torch.max(base_feat, dim=1)[0].resize(68, 120).cpu().detach().numpy()
-        # im = aa/max(aa[0])
+        # # aa = torch.mean(base_feat, dim=1).resize(67, 120).cpu().detach().numpy()
+        # aa = torch.max(base_feat, dim=1)[0].resize(67, 120).cpu().detach().numpy()
+        # im = aa/np.amax(aa)
         # im = cv2.resize(im, (0, 0), fx=10, fy=10)
         # cv2.imshow('h', im)
         # cv2.waitKey(0)

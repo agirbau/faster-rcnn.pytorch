@@ -1,5 +1,5 @@
 # TODO: 1. Associar bbox amb prior (DONE)
-# TODO: 1.5. Entrenar xarxa per player detection
+# TODO: 1.5. Entrenar xarxa per player detection (DONE)
 # TODO: 2. Detectar bbox respecte priors i respecte anchors. Fer NMS de deteccions de priors vs anchors.
 # TODO: 3. Assignar ID a cada bbox nova (que no vingui de les priors).
 # TODO: 4. Entrenar una xarxa siamesa per reidentificació
@@ -61,13 +61,13 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
     parser.add_argument('--dataset', dest='dataset',
                         help='training dataset',
-                        default='coco', type=str)  # pascal_voc, coco
+                        default='cst', type=str)  # pascal_voc, coco, cst
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file',
-                        default='cfgs/res101.yml', type=str)  # vgg16, res101
+                        default='cfgs/vgg16.yml', type=str)  # vgg16, res101
     parser.add_argument('--net', dest='net',
                         help='vgg16, res50, res101, res152',
-                        default='res101', type=str)
+                        default='vgg16', type=str)
     parser.add_argument('--set', dest='set_cfgs',
                         help='set config keys', default=None,
                         nargs=argparse.REMAINDER)
@@ -94,10 +94,10 @@ def parse_args():
                         default=1, type=int)
     parser.add_argument('--checkepoch', dest='checkepoch',
                         help='checkepoch to load network',
-                        default=10, type=int)  # 6, 10
+                        default=14, type=int)  # 6, 10
     parser.add_argument('--checkpoint', dest='checkpoint',
                         help='checkpoint to load network',
-                        default=14657, type=int)  # 10021, 14657
+                        default=1895, type=int)  # 10021, 14657
     parser.add_argument('--bs', dest='batch_size',
                         help='batch_size',
                         default=1, type=int)
@@ -191,6 +191,9 @@ if __name__ == '__main__':
                                      "diningtable","toilet","tvmonitor","laptop","mouse","remote","keyboard","cell phone",
                                      "microwave","oven","toaster","sink",
                                      "refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"])
+    elif args.dataset == 'cst':
+        pascal_classes = ('__background__',  # always index 0
+                         'ball', 'player', 'referee')
     else:
         pascal_classes = np.asarray(['__background__',
                                      'aeroplane', 'bicycle', 'bird', 'boat',
@@ -259,7 +262,7 @@ if __name__ == '__main__':
 
     start = time.time()
     max_per_image = 100
-    thresh = 0.05
+    thresh = 0.1
     vis = True
 
     webcam_num = args.webcam_num
