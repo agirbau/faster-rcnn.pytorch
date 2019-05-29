@@ -45,8 +45,15 @@ class custom_voc(imdb):
         self._devkit_path = self._get_default_path() if devkit_path is None \
             else devkit_path
         self._data_path = os.path.join(self._devkit_path, dataset_name)
-        self._classes = ('__background__',  # always index 0
-                         'ball', 'player', 'referee')
+        rem_ball = True
+        only_players = True
+        if not rem_ball:
+            self._classes = ('__background__',  # always index 0
+                             'ball', 'player', 'referee')
+        elif only_players:
+            self._classes = ('__background__', 'player')
+        else:
+            self._classes = ('__background__', 'player', 'referee')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
         self._image_index = self._load_image_set_index()
@@ -59,7 +66,8 @@ class custom_voc(imdb):
         # PASCAL specific config options
         self.config = {'cleanup': True,
                        'use_salt': True,
-                       'use_diff': False,
+                       'remove_ball': rem_ball,
+                       'only_player': only_players,
                        'matlab_eval': False,
                        'rpn_file': None,
                        'min_size': 2}
@@ -208,14 +216,12 @@ class custom_voc(imdb):
         img_h = float(img_data.find('height').text)
         img_d = float(img_data.find('depth').text)
         objs = tree.findall('object')
-        # if not self.config['use_diff']:
-        #     # Exclude the samples labeled as difficult
-        #     non_diff_objs = [
-        #         obj for obj in objs if int(obj.find('difficult').text) == 0]
-        #     # if len(non_diff_objs) != len(objs):
-        #     #     print 'Removed {} difficult objects'.format(
-        #     #         len(objs) - len(non_diff_objs))
-        #     objs = non_diff_objs
+
+        if self.config['remove_ball']:
+            # Exclude the samples labeled as ball
+            non_diff_objs = [obj for obj in objs if obj.find('name').text != 'ball']
+            objs = non_diff_objs
+
         num_objs = len(objs)
 
         boxes = np.zeros((num_objs, 4), dtype=np.uint16)
@@ -249,7 +255,10 @@ class custom_voc(imdb):
             difficult = 0 if diffc == None else int(diffc.text)
             ishards[ix] = difficult
 
-            cls = self._class_to_ind[obj.find('name').text.lower().strip()]
+            label = obj.find('name').text.lower()
+            if label == 'referee' and self.config['only_player']:
+                label = 'player'
+            cls = self._class_to_ind[label.strip()]
             boxes[ix, :] = [x1, y1, x2, y2]
             gt_classes[ix] = cls
             overlaps[ix, cls] = 1.0

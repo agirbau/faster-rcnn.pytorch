@@ -178,7 +178,8 @@ if __name__ == '__main__':
   elif args.dataset == "cst":
       args.imdb_name = "basketball"
       args.imdbval_name = "basketball"
-      args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 11]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '40']
+      # args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 11]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '40']
+      args.set_cfgs = ['ANCHOR_SCALES', '[4, 8, 11]', 'ANCHOR_RATIOS', '[1,1.8,2.5]', 'MAX_NUM_GT_BOXES', '40']
 
   args.cfg_file = "cfgs/{}_ls.yml".format(args.net) if args.large_scale else "cfgs/{}.yml".format(args.net)
 

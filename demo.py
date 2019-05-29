@@ -91,10 +91,10 @@ def parse_args():
                         default=0, type=int)
     parser.add_argument('--checksession', dest='checksession',
                         help='checksession to load model',
-                        default=1, type=int)
+                        default=2, type=int)
     parser.add_argument('--checkepoch', dest='checkepoch',
                         help='checkepoch to load network',
-                        default=14, type=int)  # 6, 10
+                        default=20, type=int)  # 6, 10
     parser.add_argument('--checkpoint', dest='checkpoint',
                         help='checkpoint to load network',
                         default=1895, type=int)  # 10021, 14657
@@ -192,8 +192,9 @@ if __name__ == '__main__':
                                      "microwave","oven","toaster","sink",
                                      "refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"])
     elif args.dataset == 'cst':
-        pascal_classes = ('__background__',  # always index 0
-                         'ball', 'player', 'referee')
+        # pascal_classes = ('__background__',  # always index 0
+        #                  'ball', 'player', 'referee')
+        pascal_classes = ('__background__', 'player')  # Session 2
     else:
         pascal_classes = np.asarray(['__background__',
                                      'aeroplane', 'bicycle', 'bird', 'boat',
