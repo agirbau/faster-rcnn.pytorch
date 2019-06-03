@@ -107,6 +107,9 @@ def parse_args():
     parser.add_argument('--webcam_num', dest='webcam_num',
                         help='webcam ID number',
                         default=-1, type=int)
+    parser.add_argument('--video', dest='video_file',
+                        help='Video file path',
+                        default='', type=str)
 
     args = parser.parse_args()
     return args
@@ -271,6 +274,9 @@ if __name__ == '__main__':
     if webcam_num >= 0 :
         cap = cv2.VideoCapture(webcam_num)
         num_images = 0
+    elif args.video_file != '':
+        cap = cv2.VideoCapture(args.video_file)
+        num_images = 0
     else:
         imglist = sorted(os.listdir(args.image_dir), reverse=True)
         num_images = len(imglist)
@@ -286,7 +292,7 @@ if __name__ == '__main__':
 
     while (num_images >= 0):
         total_tic = time.time()
-        if webcam_num == -1:
+        if webcam_num == -1 and args.video_file == '':
             num_images -= 1
 
         # Get image from the webcam
@@ -296,6 +302,12 @@ if __name__ == '__main__':
             ret, frame = cap.read()
             im_in = np.array(frame)
         # Load the demo image
+        elif args.video_file != '':
+            if not cap.isOpened():
+                raise RuntimeError("Video error.")
+            ret, frame = cap.read()
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            im_in = np.array(frame_rgb)
         else:
             im_file = os.path.join(args.image_dir, imglist[num_images])
             # im = cv2.imread(im_file)
@@ -431,32 +443,32 @@ if __name__ == '__main__':
                         cv2.FONT_HERSHEY_PLAIN, fontScale=1, color=(0, 0, 255), thickness=2)
 
         cv2.imshow('h', im_2)
-        cv2.waitKey(0)
+        cv2.waitKey(1)
 
         prev_bboxes_th = bboxes_th
 
         misc_toc = time.time()
         nms_time = misc_toc - misc_tic
 
-        if webcam_num == -1:
+        if webcam_num == -1 and args.video_file == '':
             sys.stdout.write('im_detect: {:d}/{:d} {:.3f}s {:.3f}s   \r' \
                              .format(num_images + 1, len(imglist), detect_time, nms_time))
             sys.stdout.flush()
 
-        if vis and webcam_num == -1:
+        if vis and webcam_num == -1 and args.video_file == '':
             # cv2.imshow('test', im2show)
             # cv2.waitKey(0)
             result_path = os.path.join(args.image_dir, imglist[num_images][:-4] + "_det.jpg")
             # cv2.imwrite(result_path, im2show)
-        else:
-            im2showRGB = cv2.cvtColor(im2show, cv2.COLOR_BGR2RGB)
-            cv2.imshow("frame", im2showRGB)
-            total_toc = time.time()
-            total_time = total_toc - total_tic
-            frame_rate = 1 / total_time
-            print('Frame rate:', frame_rate)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+        # else:
+        #     im2showRGB = cv2.cvtColor(im2show, cv2.COLOR_BGR2RGB)
+        #     cv2.imshow("frame", im2showRGB)
+        #     total_toc = time.time()
+        #     total_time = total_toc - total_tic
+        #     frame_rate = 1 / total_time
+        #     print('Frame rate:', frame_rate)
+        #     if cv2.waitKey(1) & 0xFF == ord('q'):
+        #         break
     if webcam_num >= 0:
         cap.release()
         cv2.destroyAllWindows()
